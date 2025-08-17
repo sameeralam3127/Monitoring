@@ -1,0 +1,181 @@
+{
+  "id": null,
+  "title": "Advanced Linux & Docker Monitoring",
+  "tags": ["linux", "docker", "systemd", "prometheus"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 2,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Node Status (UP/DOWN)",
+      "targets": [
+        {
+          "expr": "up{job=\"node_exporter\"}",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "stat",
+      "title": "System Uptime",
+      "targets": [
+        {
+          "expr": "node_time_seconds - node_boot_time_seconds",
+          "legendFormat": "{{instance}}"
+        }
+      ],
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "graph",
+      "title": "Load Average (1m, 5m, 15m)",
+      "targets": [
+        { "expr": "node_load1", "legendFormat": "Load 1m ({{instance}})" },
+        { "expr": "node_load5", "legendFormat": "Load 5m ({{instance}})" },
+        { "expr": "node_load15", "legendFormat": "Load 15m ({{instance}})" }
+      ],
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 6 }
+    },
+    {
+      "type": "graph",
+      "title": "CPU Usage Breakdown",
+      "targets": [
+        {
+          "expr": "rate(node_cpu_seconds_total{mode=\"user\"}[2m])",
+          "legendFormat": "User ({{instance}})"
+        },
+        {
+          "expr": "rate(node_cpu_seconds_total{mode=\"system\"}[2m])",
+          "legendFormat": "System ({{instance}})"
+        },
+        {
+          "expr": "rate(node_cpu_seconds_total{mode=\"idle\"}[2m])",
+          "legendFormat": "Idle ({{instance}})"
+        },
+        {
+          "expr": "rate(node_cpu_seconds_total{mode=\"iowait\"}[2m])",
+          "legendFormat": "IO Wait ({{instance}})"
+        },
+        {
+          "expr": "rate(node_cpu_seconds_total{mode=\"steal\"}[2m])",
+          "legendFormat": "Steal ({{instance}})"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 10, "w": 12, "h": 6 }
+    },
+    {
+      "type": "graph",
+      "title": "Memory Usage & Swap",
+      "targets": [
+        {
+          "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
+          "legendFormat": "Used ({{instance}})"
+        },
+        {
+          "expr": "node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes",
+          "legendFormat": "Swap Used ({{instance}})"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 6 }
+    },
+    {
+      "type": "graph",
+      "title": "Disk Usage by Mountpoint",
+      "targets": [
+        {
+          "expr": "node_filesystem_size_bytes - node_filesystem_free_bytes",
+          "legendFormat": "{{instance}} {{mountpoint}}"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 22, "w": 12, "h": 6 }
+    },
+    {
+      "type": "graph",
+      "title": "Network Errors & Dropped Packets",
+      "targets": [
+        {
+          "expr": "rate(node_network_receive_errs_total[2m])",
+          "legendFormat": "Rx Errors ({{instance}})"
+        },
+        {
+          "expr": "rate(node_network_transmit_errs_total[2m])",
+          "legendFormat": "Tx Errors ({{instance}})"
+        },
+        {
+          "expr": "rate(node_network_receive_drop_total[2m])",
+          "legendFormat": "Rx Drops ({{instance}})"
+        },
+        {
+          "expr": "rate(node_network_transmit_drop_total[2m])",
+          "legendFormat": "Tx Drops ({{instance}})"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 28, "w": 12, "h": 6 }
+    },
+    {
+      "type": "graph",
+      "title": "Logged-in Users",
+      "targets": [
+        {
+          "expr": "node_users_logged_in",
+          "legendFormat": "Users ({{instance}})"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 34, "w": 6, "h": 6 }
+    },
+    {
+      "type": "graph",
+      "title": "Running Processes",
+      "targets": [
+        {
+          "expr": "node_processes_running",
+          "legendFormat": "Running ({{instance}})"
+        },
+        {
+          "expr": "node_processes_blocked",
+          "legendFormat": "Blocked ({{instance}})"
+        }
+      ],
+      "gridPos": { "x": 6, "y": 34, "w": 6, "h": 6 }
+    },
+    {
+      "type": "table",
+      "title": "Systemd Services Status",
+      "targets": [
+        {
+          "expr": "node_systemd_unit_state{state=\"active\"}",
+          "legendFormat": "{{name}} - Active"
+        },
+        {
+          "expr": "node_systemd_unit_state{state=\"failed\"}",
+          "legendFormat": "{{name}} - Failed"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 40, "w": 12, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "Container CPU Usage (cAdvisor)",
+      "targets": [
+        {
+          "expr": "rate(container_cpu_usage_seconds_total{name!=\"\", image!=\"\"}[2m])",
+          "legendFormat": "{{name}}"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 48, "w": 12, "h": 6 }
+    },
+    {
+      "type": "graph",
+      "title": "Container Memory Usage (cAdvisor)",
+      "targets": [
+        {
+          "expr": "container_memory_usage_bytes{name!=\"\", image!=\"\"}",
+          "legendFormat": "{{name}}"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 54, "w": 12, "h": 6 }
+    }
+  ]
+}
