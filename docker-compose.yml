@@ -1,0 +1,104 @@
+version: "3.9"
+
+services:
+  # Linux hosts with Node Exporter
+  linux_system_1:
+    build: .
+    container_name: linux_system_1
+    ports:
+      - "9101:9100"
+    tty: true
+
+  linux_system_2:
+    build: .
+    container_name: linux_system_2
+    ports:
+      - "9102:9100"
+    tty: true
+
+  linux_system_3:
+    build: .
+    container_name: linux_system_3
+    ports:
+      - "9103:9100"
+    tty: true
+
+  linux_system_4:
+    build: .
+    container_name: linux_system_4
+    ports:
+      - "9104:9100"
+    tty: true
+
+  linux_system_5:
+    build: .
+    container_name: linux_system_5
+    ports:
+      - "9105:9100"
+    tty: true
+
+  linux_system_6:
+    build: .
+    container_name: linux_system_6
+    ports:
+      - "9106:9100"
+    tty: true
+
+  linux_system_7:
+    build: .
+    container_name: linux_system_7
+    ports:
+      - "9107:9100"
+    tty: true
+
+  linux_system_8:
+    build: .
+    container_name: linux_system_8
+    ports:
+      - "9108:9100"
+    tty: true
+
+  linux_system_9:
+    build: .
+    container_name: linux_system_9
+    ports:
+      - "9109:9100"
+    tty: true
+
+  linux_system_10:
+    build: .
+    container_name: linux_system_10
+    ports:
+      - "9110:9100"
+    tty: true
+
+  # cAdvisor
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin

@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "node_exporter"
+    static_configs:
+      - targets:
+          - linux_system_1:9100
+          - linux_system_2:9100
+          - linux_system_3:9100
+          - linux_system_4:9100
+          - linux_system_5:9100
+          - linux_system_6:9100
+          - linux_system_7:9100
+          - linux_system_8:9100
+          - linux_system_9:9100
+          - linux_system_10:9100
+
+  - job_name: "cadvisor"
+    static_configs:
+      - targets: ["cadvisor:8080"]
