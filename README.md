@@ -4,13 +4,7 @@ This repository provides a full Docker-based monitoring stack to manage 10 Linux
 
 ---
 
-## Repository
-
-👉 [https://github.com/sameeralam3127/monitoring](https://github.com/sameeralam3127/monitoring)
-
----
-
-## 🚀 Features
+## Features
 
 - **10 Linux containers** running Node Exporter to simulate monitored hosts
 - **cAdvisor** for Docker container metrics
@@ -21,7 +15,7 @@ This repository provides a full Docker-based monitoring stack to manage 10 Linux
 
 ---
 
-## ⚙️ Tech Stack
+##  Tech Stack
 
 - **Docker & Docker Compose** — container orchestration
 - **Prometheus** — metrics collection and alerting
@@ -31,7 +25,7 @@ This repository provides a full Docker-based monitoring stack to manage 10 Linux
 
 ---
 
-## 📦 Setup Instructions
+##  Setup Instructions
 
 ### 1. Clone the Repository
 
@@ -61,7 +55,7 @@ This will:
 
 ---
 
-## 🌍 Accessing Services
+## Accessing Services
 
 | Service    | URL                                            | Login           |
 | ---------- | ---------------------------------------------- | --------------- |
@@ -71,7 +65,7 @@ This will:
 
 ---
 
-## 📊 Grafana Setup
+##  Grafana Setup
 
 1. Log in to Grafana at [http://localhost:3000](http://localhost:3000)
    Username: `admin`
@@ -88,7 +82,7 @@ This will:
 
 ---
 
-## 🔍 Prometheus Example Queries
+##  Prometheus Example Queries
 
 - **CPU Usage** (per container):
 
@@ -128,7 +122,7 @@ This will:
 
 ---
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 - **Prometheus target down**
 
@@ -159,7 +153,7 @@ This will:
 
 ---
 
-## 📌 Notes
+## Notes
 
 - Each Linux container exposes Node Exporter on a unique port (`9101` … `9110`)
 - Prometheus config is in `prometheus/prometheus.yml`
