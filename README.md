@@ -161,6 +161,6 @@ This will:
 
 ---
 
-## 📜 License
+## License
 
 MIT License
