@@ -191,7 +191,7 @@ docker compose restart grafana
 The repository also includes:
 
 - `grafana-dashboard.json` as a standalone dashboard export
-- `Screenshot 2026-04-05 at 11.57.50 PM.png` as a dashboard preview image
+- `Screenshot.png` as a dashboard preview image
 
 ![Dashboard Preview](./Screenshot%202026-04-05%20at%2011.57.50%E2%80%AFPM.png)
 
