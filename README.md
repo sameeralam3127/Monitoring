@@ -203,7 +203,7 @@ The repository also includes:
 - If the Node Exporter image build fails, retry with working internet access because the Dockerfile downloads the exporter binary during build.
 - If alerts do not notify anywhere, add a real receiver configuration in `alertmanager/alertmanager.yml`.
 
-## Suggested Next Improvements
+## Next Improvements
 
 - Add Slack, email, or PagerDuty integrations to Alertmanager
 - Add OpenTelemetry and Tempo for traces
