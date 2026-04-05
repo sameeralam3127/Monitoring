@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: monitoring-dashboards
+    orgId: 1
+    folder: Monitoring Stack
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 15
+    options:
+      path: /var/lib/grafana/dashboards

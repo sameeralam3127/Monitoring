@@ -1,0 +1,23 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: default-receiver
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 2h
+  group_by:
+    - alertname
+    - job
+
+receivers:
+  - name: default-receiver
+
+inhibit_rules:
+  - source_matchers:
+      - severity = critical
+    target_matchers:
+      - severity =~ warning|info
+    equal:
+      - alertname
+      - instance

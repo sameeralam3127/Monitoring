@@ -1,165 +1,118 @@
-# Monitoring Stack with Linux Containers, Prometheus, Grafana, Node Exporter, and cAdvisor
+# Advanced Monitoring Stack with Prometheus, Grafana, Loki, Alertmanager, Blackbox Exporter, Node Exporter, and cAdvisor
 
-This repository provides a full Docker-based monitoring stack to manage 10 Linux containers and monitor their system resources using Prometheus, Grafana, Node Exporter, and cAdvisor.
+This repository now ships a more production-style observability stack for Docker workloads. It still simulates 10 Linux hosts with Node Exporter, but it also adds alerting, synthetic monitoring, log aggregation, and Grafana auto-provisioning so the stack is useful beyond basic metric collection.
 
----
+## What's Included
 
-## Features
+- `10` Linux containers exporting host metrics through Node Exporter
+- `Prometheus` for metric collection, alert rule evaluation, and target health
+- `Alertmanager` for routing and grouping alerts
+- `Grafana` with pre-provisioned data sources and dashboards
+- `cAdvisor` for Docker and container runtime metrics
+- `Blackbox Exporter` for HTTP health checks against internal services
+- `Loki + Promtail` for centralized logs from the Docker host and containers
+- Persistent volumes for Prometheus, Grafana, and Loki
 
-- **10 Linux containers** running Node Exporter to simulate monitored hosts
-- **cAdvisor** for Docker container metrics
-- **Prometheus** for collecting metrics
-- **Grafana** for visualization
-- **Persistent storage** for Prometheus and Grafana
-- **Pre-built Grafana dashboards** (JSON file included)
+## Architecture
 
----
+```text
+Node Exporters (10 hosts) ----\
+                               \
+cAdvisor -----------------------> Prometheus ----> Alertmanager
+                                /        \
+Blackbox Exporter probes ------/          \----> Grafana
 
-##  Tech Stack
-
-- **Docker & Docker Compose** — container orchestration
-- **Prometheus** — metrics collection and alerting
-- **Grafana** — visualization and dashboards
-- **Node Exporter** — system-level metrics (CPU, RAM, disk, services, users)
-- **cAdvisor** — container resource metrics
-
----
-
-##  Setup Instructions
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/sameeralam3127/monitoring.git
-cd monitoring
+Docker/container logs ----> Promtail ----> Loki ----> Grafana
 ```
 
-### 2. Check Docker Installation
+## Services
+
+| Service | URL | Notes |
+| --- | --- | --- |
+| Grafana | [http://localhost:3000](http://localhost:3000) | `admin / admin` |
+| Prometheus | [http://localhost:9090](http://localhost:9090) | Targets, rules, alerts |
+| Alertmanager | [http://localhost:9093](http://localhost:9093) | Alert routing UI |
+| cAdvisor | [http://localhost:8080](http://localhost:8080) | Container metrics |
+| Blackbox Exporter | [http://localhost:9115](http://localhost:9115) | Probe metrics |
+| Loki | [http://localhost:3100/ready](http://localhost:3100/ready) | Log backend readiness |
+
+## Quick Start
 
 ```bash
-docker --version
-docker-compose --version
+docker compose up -d --build
 ```
 
-### 3. Build and Start the Stack
+Grafana is pre-provisioned with:
 
-```bash
-docker-compose up -d --build
-```
+- a `Prometheus` data source
+- a `Loki` data source
+- the `Advanced Monitoring Stack` dashboard
 
-This will:
+## What Changed from the Basic Stack
 
-- Build `linux_system` images with Node Exporter
-- Start **10 Linux containers**
-- Start **Prometheus, Grafana, and cAdvisor**
+- Added Prometheus alert rules in [`/Users/sameeralam/Documents/GitHub/Monitoring/prometheus/rules/alerts.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/prometheus/rules/alerts.yml)
+- Added Alertmanager config in [`/Users/sameeralam/Documents/GitHub/Monitoring/alertmanager/alertmanager.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/alertmanager/alertmanager.yml)
+- Added Blackbox Exporter config in [`/Users/sameeralam/Documents/GitHub/Monitoring/blackbox/blackbox.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/blackbox/blackbox.yml)
+- Added Loki and Promtail configs in [`/Users/sameeralam/Documents/GitHub/Monitoring/loki/loki-config.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/loki/loki-config.yml) and [`/Users/sameeralam/Documents/GitHub/Monitoring/promtail/promtail-config.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/promtail/promtail-config.yml)
+- Added Grafana provisioning in [`/Users/sameeralam/Documents/GitHub/Monitoring/grafana/provisioning/datasources/datasources.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/grafana/provisioning/datasources/datasources.yml) and [`/Users/sameeralam/Documents/GitHub/Monitoring/grafana/provisioning/dashboards/dashboards.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/grafana/provisioning/dashboards/dashboards.yml)
 
----
+## Prometheus Jobs
 
-## Accessing Services
+- `prometheus`
+- `alertmanager`
+- `node_exporter`
+- `cadvisor`
+- `blackbox-exporter`
+- `blackbox-http`
 
-| Service    | URL                                            | Login           |
-| ---------- | ---------------------------------------------- | --------------- |
-| Grafana    | [http://localhost:3000](http://localhost:3000) | `admin / admin` |
-| Prometheus | [http://localhost:9090](http://localhost:9090) | N/A             |
-| cAdvisor   | [http://localhost:8080](http://localhost:8080) | N/A             |
+## Included Alerts
 
----
+- `TargetDown`
+- `HostHighCPU`
+- `HostHighMemory`
+- `ContainerHighCPU`
+- `ContainerHighMemory`
+- `SyntheticProbeFailed`
 
-##  Grafana Setup
+## Grafana Dashboard
 
-1. Log in to Grafana at [http://localhost:3000](http://localhost:3000)
-   Username: `admin`
-   Password: `admin`
+The provisioned dashboard includes:
 
-2. Add **Prometheus as a data source**:
+- fleet-wide CPU and memory overview
+- per-node CPU and memory trends
+- container CPU and memory charts
+- synthetic probe success and latency
+- firing alerts table
+- live logs from Loki
 
-   - URL: `http://prometheus:9090`
+## Suggested Next Additions
 
-3. Import Dashboard:
+If you want to make this stack even more advanced, these are the highest-value next steps:
 
-   - Navigate to **Dashboards → Import**
-   - Upload the provided JSON file in `grafana/dashboard.json`
+1. Connect Alertmanager to Slack, Microsoft Teams, Discord, email, or PagerDuty so alerts leave the lab and reach people.
+2. Add recording rules for SLO-style metrics such as request availability, error budgets, and per-service latency percentiles.
+3. Instrument an application with OpenTelemetry and send traces to Tempo so Grafana can correlate metrics, logs, and traces.
+4. Add exporters for your real infrastructure, such as `postgres_exporter`, `redis_exporter`, `nginx-prometheus-exporter`, `mysqld_exporter`, and cloud provider exporters.
+5. Add service discovery for Kubernetes, Docker Swarm, EC2, or Consul instead of static target lists.
+6. Add Grafana alerting and on-call dashboards for business KPIs, deployment markers, and release health.
+7. Add long-term metric storage with Thanos, Mimir, or VictoriaMetrics if retention and multi-node scale matter.
+8. Add log parsing pipelines in Promtail for JSON logs, nginx access logs, and application severity labels.
+9. Add SSL/TLS, secrets management, and non-default credentials before using the stack outside local development.
+10. Add exporters for uptime of external APIs, DNS, ICMP, and TCP checks through more Blackbox modules.
 
----
+## Operational Notes
 
-##  Prometheus Example Queries
-
-- **CPU Usage** (per container):
-
-  ```promql
-  rate(node_cpu_seconds_total{mode="user"}[5m])
-  ```
-
-- **Memory Usage**:
-
-  ```promql
-  node_memory_Active_bytes / node_memory_MemTotal_bytes * 100
-  ```
-
-- **Running Services (systemd)**:
-
-  ```promql
-  node_systemd_unit_state{state="active"}
-  ```
-
-- **Failed Services**:
-
-  ```promql
-  node_systemd_unit_state{state="failed"}
-  ```
-
-- **Logged-in Users**:
-
-  ```promql
-  node_users_logged_in
-  ```
-
-- **Docker Container CPU Usage (from cAdvisor)**:
-
-  ```promql
-  rate(container_cpu_usage_seconds_total{name=~".+"}[5m])
-  ```
-
----
+- Prometheus evaluates rules every `15s`
+- Blackbox Exporter probes Grafana, Prometheus, cAdvisor, Alertmanager, and Loki
+- Grafana auto-loads the dashboard at startup
+- Promtail tails host logs and Docker container JSON logs
 
 ## Troubleshooting
 
-- **Prometheus target down**
-
-  - Check Prometheus targets at [http://localhost:9090/targets](http://localhost:9090/targets)
-  - Verify container is running: `docker ps`
-  - Restart service:
-
-    ```bash
-    docker-compose restart prometheus
-    ```
-
-- **Grafana not saving dashboards**
-
-  - Ensure `grafana_data` volume is correctly mounted
-  - Restart Grafana:
-
-    ```bash
-    docker-compose restart grafana
-    ```
-
-- **cAdvisor not accessible**
-
-  - Check logs:
-
-    ```bash
-    docker logs cadvisor
-    ```
-
----
-
-## Notes
-
-- Each Linux container exposes Node Exporter on a unique port (`9101` … `9110`)
-- Prometheus config is in `prometheus/prometheus.yml`
-- All services use **persistent volumes**
-
----
+- If Grafana starts without the dashboard, check Grafana logs and verify the mounted provisioning paths.
+- If Promtail cannot read Docker logs on your platform, confirm Docker exposes container logs under `/var/lib/docker/containers`.
+- If alerts appear in Prometheus but not in notifications, add a real receiver integration to Alertmanager.
+- If Node Exporter containers fail to build, the Dockerfile may need internet access during image build to download the exporter binary.
 
 ## License
 
