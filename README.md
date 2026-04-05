@@ -27,14 +27,14 @@ Docker/container logs ----> Promtail ----> Loki ----> Grafana
 
 ## Services
 
-| Service | URL | Notes |
-| --- | --- | --- |
-| Grafana | [http://localhost:3000](http://localhost:3000) | `admin / admin` |
-| Prometheus | [http://localhost:9090](http://localhost:9090) | Targets, rules, alerts |
-| Alertmanager | [http://localhost:9093](http://localhost:9093) | Alert routing UI |
-| cAdvisor | [http://localhost:8080](http://localhost:8080) | Container metrics |
-| Blackbox Exporter | [http://localhost:9115](http://localhost:9115) | Probe metrics |
-| Loki | [http://localhost:3100/ready](http://localhost:3100/ready) | Log backend readiness |
+| Service           | URL                                                        | Notes                  |
+| ----------------- | ---------------------------------------------------------- | ---------------------- |
+| Grafana           | [http://localhost:3000](http://localhost:3000)             | `admin / admin`        |
+| Prometheus        | [http://localhost:9090](http://localhost:9090)             | Targets, rules, alerts |
+| Alertmanager      | [http://localhost:9093](http://localhost:9093)             | Alert routing UI       |
+| cAdvisor          | [http://localhost:8080](http://localhost:8080)             | Container metrics      |
+| Blackbox Exporter | [http://localhost:9115](http://localhost:9115)             | Probe metrics          |
+| Loki              | [http://localhost:3100/ready](http://localhost:3100/ready) | Log backend readiness  |
 
 ## Quick Start
 
@@ -84,6 +84,8 @@ The provisioned dashboard includes:
 - synthetic probe success and latency
 - firing alerts table
 - live logs from Loki
+
+![alt text](<Screenshot 2026-04-05 at 11.57.50 PM.png>)
 
 ## Suggested Next Additions
 
