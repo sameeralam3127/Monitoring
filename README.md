@@ -1,54 +1,108 @@
-# Advanced Monitoring Stack with Prometheus, Grafana, Loki, Alertmanager, Blackbox Exporter, Node Exporter, and cAdvisor
+# Advanced Monitoring Stack
 
-This repository now ships a more production-style observability stack for Docker workloads. It still simulates 10 Linux hosts with Node Exporter, but it also adds alerting, synthetic monitoring, log aggregation, and Grafana auto-provisioning so the stack is useful beyond basic metric collection.
+This repository contains a Docker-based monitoring and observability stack for Linux containers. It includes host metrics, container metrics, alerting, synthetic health checks, centralized logging, and a pre-provisioned Grafana dashboard.
 
-## What's Included
+## Stack Components
 
-- `10` Linux containers exporting host metrics through Node Exporter
-- `Prometheus` for metric collection, alert rule evaluation, and target health
-- `Alertmanager` for routing and grouping alerts
-- `Grafana` with pre-provisioned data sources and dashboards
-- `cAdvisor` for Docker and container runtime metrics
-- `Blackbox Exporter` for HTTP health checks against internal services
-- `Loki + Promtail` for centralized logs from the Docker host and containers
-- Persistent volumes for Prometheus, Grafana, and Loki
+- `Prometheus` for scraping metrics and evaluating alert rules
+- `Grafana` for dashboards and visualization
+- `Alertmanager` for alert routing
+- `Node Exporter` running in 10 Linux containers for host-level metrics
+- `cAdvisor` for container-level metrics
+- `Blackbox Exporter` for HTTP health checks
+- `Loki` for log storage
+- `Promtail` for collecting logs and sending them to Loki
 
-## Architecture
+## Services and Ports
 
-```text
-Node Exporters (10 hosts) ----\
-                               \
-cAdvisor -----------------------> Prometheus ----> Alertmanager
-                                /        \
-Blackbox Exporter probes ------/          \----> Grafana
+| Service             | Port   | URL                                                        |
+| ------------------- | ------ | ---------------------------------------------------------- |
+| Grafana             | `3000` | [http://localhost:3000](http://localhost:3000)             |
+| Prometheus          | `9090` | [http://localhost:9090](http://localhost:9090)             |
+| Alertmanager        | `9093` | [http://localhost:9093](http://localhost:9093)             |
+| cAdvisor            | `8080` | [http://localhost:8080](http://localhost:8080)             |
+| Blackbox Exporter   | `9115` | [http://localhost:9115](http://localhost:9115)             |
+| Loki Ready Endpoint | `3100` | [http://localhost:3100/ready](http://localhost:3100/ready) |
 
-Docker/container logs ----> Promtail ----> Loki ----> Grafana
+Node Exporter containers are exposed on ports `9101` to `9110`.
+
+## Setup Prerequisites
+
+Before starting, make sure you have:
+
+- Docker installed
+- Docker Compose available through `docker compose`
+- Internet access during the first build because the Docker image downloads Node Exporter
+
+Check versions:
+
+```bash
+docker --version
+docker compose version
 ```
 
-## Services
+## Setup Steps
 
-| Service           | URL                                                        | Notes                  |
-| ----------------- | ---------------------------------------------------------- | ---------------------- |
-| Grafana           | [http://localhost:3000](http://localhost:3000)             | `admin / admin`        |
-| Prometheus        | [http://localhost:9090](http://localhost:9090)             | Targets, rules, alerts |
-| Alertmanager      | [http://localhost:9093](http://localhost:9093)             | Alert routing UI       |
-| cAdvisor          | [http://localhost:8080](http://localhost:8080)             | Container metrics      |
-| Blackbox Exporter | [http://localhost:9115](http://localhost:9115)             | Probe metrics          |
-| Loki              | [http://localhost:3100/ready](http://localhost:3100/ready) | Log backend readiness  |
+### 1. Clone the repository
 
-## Quick Start
+```bash
+git clone https://github.com/sameeralam3127/monitoring.git
+cd monitoring
+```
+
+### 2. Start the full stack
 
 ```bash
 docker compose up -d --build
 ```
 
-Grafana is pre-provisioned with:
+This command will:
 
-- a `Prometheus` data source
-- a `Loki` data source
-- the `Advanced Monitoring Stack` dashboard
+- build the Linux container image from `Dockerfile`
+- start `10` Linux containers with Node Exporter
+- start Prometheus, Grafana, Alertmanager, cAdvisor, Blackbox Exporter, Loki, and Promtail
+- create persistent Docker volumes for Grafana, Prometheus, and Loki
 
-## Prometheus Jobs
+### 3. Verify the containers are running
+
+```bash
+docker compose ps
+```
+
+### 4. Open the services
+
+- Grafana: [http://localhost:3000](http://localhost:3000)
+- Prometheus: [http://localhost:9090](http://localhost:9090)
+- Alertmanager: [http://localhost:9093](http://localhost:9093)
+- cAdvisor: [http://localhost:8080](http://localhost:8080)
+
+Grafana default login:
+
+- Username: `admin`
+- Password: `admin`
+
+## Grafana Setup
+
+Grafana is already provisioned automatically using:
+
+- `grafana/provisioning/datasources/datasources.yml`
+- `grafana/provisioning/dashboards/dashboards.yml`
+- `grafana/dashboards/advanced-monitoring-dashboard.json`
+
+After login, you should already see:
+
+- `Prometheus` as the default data source
+- `Loki` as the log data source
+- `Advanced Monitoring Stack` dashboard
+
+## Prometheus Configuration
+
+Prometheus configuration lives in:
+
+- `prometheus/prometheus.yml`
+- `prometheus/rules/alerts.yml`
+
+Configured scrape jobs:
 
 - `prometheus`
 - `alertmanager`
@@ -57,7 +111,7 @@ Grafana is pre-provisioned with:
 - `blackbox-exporter`
 - `blackbox-http`
 
-## Included Alerts
+Included alerts:
 
 - `TargetDown`
 - `HostHighCPU`
@@ -66,47 +120,96 @@ Grafana is pre-provisioned with:
 - `ContainerHighMemory`
 - `SyntheticProbeFailed`
 
-## Grafana Dashboard
+## Logging Setup
 
-The provisioned dashboard includes:
+Logging is configured with:
 
-- fleet-wide CPU and memory overview
-- per-node CPU and memory trends
-- container CPU and memory charts
-- synthetic probe success and latency
-- firing alerts table
-- live logs from Loki
+- `loki/loki-config.yml`
+- `promtail/promtail-config.yml`
 
-![alt text](<Screenshot 2026-04-05 at 11.57.50 PM.png>)
+Promtail collects:
 
-## Suggested Next Additions
+- host log files from `/var/log`
+- Docker container logs from `/var/lib/docker/containers`
 
-If you want to make this stack even more advanced, these are the highest-value next steps:
+## Blackbox Monitoring
 
-1. Connect Alertmanager to Slack, Microsoft Teams, Discord, email, or PagerDuty so alerts leave the lab and reach people.
-2. Add recording rules for SLO-style metrics such as request availability, error budgets, and per-service latency percentiles.
-3. Instrument an application with OpenTelemetry and send traces to Tempo so Grafana can correlate metrics, logs, and traces.
-4. Add exporters for your real infrastructure, such as `postgres_exporter`, `redis_exporter`, `nginx-prometheus-exporter`, `mysqld_exporter`, and cloud provider exporters.
-5. Add service discovery for Kubernetes, Docker Swarm, EC2, or Consul instead of static target lists.
-6. Add Grafana alerting and on-call dashboards for business KPIs, deployment markers, and release health.
-7. Add long-term metric storage with Thanos, Mimir, or VictoriaMetrics if retention and multi-node scale matter.
-8. Add log parsing pipelines in Promtail for JSON logs, nginx access logs, and application severity labels.
-9. Add SSL/TLS, secrets management, and non-default credentials before using the stack outside local development.
-10. Add exporters for uptime of external APIs, DNS, ICMP, and TCP checks through more Blackbox modules.
+Blackbox Exporter configuration is stored in:
 
-## Operational Notes
+- `blackbox/blackbox.yml`
 
-- Prometheus evaluates rules every `15s`
-- Blackbox Exporter probes Grafana, Prometheus, cAdvisor, Alertmanager, and Loki
-- Grafana auto-loads the dashboard at startup
-- Promtail tails host logs and Docker container JSON logs
+It probes internal HTTP endpoints for:
+
+- Grafana
+- Prometheus
+- cAdvisor
+- Alertmanager
+- Loki
+
+## Useful Commands
+
+Start stack:
+
+```bash
+docker compose up -d --build
+```
+
+Stop stack:
+
+```bash
+docker compose down
+```
+
+Stop stack and remove volumes:
+
+```bash
+docker compose down -v
+```
+
+View container status:
+
+```bash
+docker compose ps
+```
+
+View logs for a service:
+
+```bash
+docker compose logs -f prometheus
+docker compose logs -f grafana
+docker compose logs -f promtail
+```
+
+Restart a service:
+
+```bash
+docker compose restart grafana
+```
+
+## Dashboard Preview
+
+The repository also includes:
+
+- `grafana-dashboard.json` as a standalone dashboard export
+- `Screenshot 2026-04-05 at 11.57.50 PM.png` as a dashboard preview image
+
+![Dashboard Preview](./Screenshot%202026-04-05%20at%2011.57.50%E2%80%AFPM.png)
 
 ## Troubleshooting
 
-- If Grafana starts without the dashboard, check Grafana logs and verify the mounted provisioning paths.
-- If Promtail cannot read Docker logs on your platform, confirm Docker exposes container logs under `/var/lib/docker/containers`.
-- If alerts appear in Prometheus but not in notifications, add a real receiver integration to Alertmanager.
-- If Node Exporter containers fail to build, the Dockerfile may need internet access during image build to download the exporter binary.
+- If Prometheus targets show as down, open [http://localhost:9090/targets](http://localhost:9090/targets).
+- If Grafana loads without dashboards, check the mounted provisioning files under `grafana/provisioning/`.
+- If Promtail cannot read Docker logs, verify that Docker stores container logs under `/var/lib/docker/containers`.
+- If the Node Exporter image build fails, retry with working internet access because the Dockerfile downloads the exporter binary during build.
+- If alerts do not notify anywhere, add a real receiver configuration in `alertmanager/alertmanager.yml`.
+
+## Suggested Next Improvements
+
+- Add Slack, email, or PagerDuty integrations to Alertmanager
+- Add OpenTelemetry and Tempo for traces
+- Add exporters for Postgres, Redis, Nginx, MySQL, and application services
+- Add TLS, secrets, and stronger credentials for non-local use
+- Add long-term metric storage with Thanos, Mimir, or VictoriaMetrics
 
 ## License
 
