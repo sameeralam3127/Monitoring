@@ -48,14 +48,6 @@ Grafana is pre-provisioned with:
 - a `Loki` data source
 - the `Advanced Monitoring Stack` dashboard
 
-## What Changed from the Basic Stack
-
-- Added Prometheus alert rules in [`/Users/sameeralam/Documents/GitHub/Monitoring/prometheus/rules/alerts.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/prometheus/rules/alerts.yml)
-- Added Alertmanager config in [`/Users/sameeralam/Documents/GitHub/Monitoring/alertmanager/alertmanager.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/alertmanager/alertmanager.yml)
-- Added Blackbox Exporter config in [`/Users/sameeralam/Documents/GitHub/Monitoring/blackbox/blackbox.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/blackbox/blackbox.yml)
-- Added Loki and Promtail configs in [`/Users/sameeralam/Documents/GitHub/Monitoring/loki/loki-config.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/loki/loki-config.yml) and [`/Users/sameeralam/Documents/GitHub/Monitoring/promtail/promtail-config.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/promtail/promtail-config.yml)
-- Added Grafana provisioning in [`/Users/sameeralam/Documents/GitHub/Monitoring/grafana/provisioning/datasources/datasources.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/grafana/provisioning/datasources/datasources.yml) and [`/Users/sameeralam/Documents/GitHub/Monitoring/grafana/provisioning/dashboards/dashboards.yml`](/Users/sameeralam/Documents/GitHub/Monitoring/grafana/provisioning/dashboards/dashboards.yml)
-
 ## Prometheus Jobs
 
 - `prometheus`
