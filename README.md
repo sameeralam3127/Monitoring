@@ -193,7 +193,15 @@ It probes internal HTTP endpoints for:
 
 ## Validation
 
-The repository includes a GitHub Actions workflow at `.github/workflows/validate.yml` that checks Docker Compose, Prometheus config/rules, and Python syntax on pushes to `main` and pull requests.
+The repository includes a GitHub Actions workflow at `.github/workflows/validate.yml` that checks Docker Compose, Prometheus config/rules, and Python tests on pushes to `main` and pull requests.
+
+Run the Python tests locally:
+
+```bash
+python -m pip install -r python-app/requirements.txt
+cd python-app
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest
+```
 
 ## Useful Commands
 

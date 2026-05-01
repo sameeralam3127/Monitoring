@@ -21,6 +21,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "python-observability-demo")
 OTLP_ENDPOINT = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://otel-collector:4317")
+OTEL_SDK_DISABLED = os.getenv("OTEL_SDK_DISABLED", "").lower() == "true"
 
 resource = Resource.create(
     {
@@ -31,19 +32,25 @@ resource = Resource.create(
 )
 
 trace_provider = TracerProvider(resource=resource)
-trace_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=OTLP_ENDPOINT)))
-trace.set_tracer_provider(trace_provider)
+if not OTEL_SDK_DISABLED:
+    trace_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=OTLP_ENDPOINT)))
+    trace.set_tracer_provider(trace_provider)
 tracer = trace.get_tracer(__name__)
 
-metric_reader = PeriodicExportingMetricReader(
-    OTLPMetricExporter(endpoint=OTLP_ENDPOINT),
-    export_interval_millis=5000,
-)
-metrics.set_meter_provider(MeterProvider(resource=resource, metric_readers=[metric_reader]))
+metric_readers = []
+if not OTEL_SDK_DISABLED:
+    metric_readers.append(
+        PeriodicExportingMetricReader(
+            OTLPMetricExporter(endpoint=OTLP_ENDPOINT),
+            export_interval_millis=5000,
+        )
+    )
+metrics.set_meter_provider(MeterProvider(resource=resource, metric_readers=metric_readers))
 meter = metrics.get_meter(__name__)
 
 logger_provider = LoggerProvider(resource=resource)
-logger_provider.add_log_record_processor(BatchLogRecordProcessor(OTLPLogExporter(endpoint=OTLP_ENDPOINT)))
+if not OTEL_SDK_DISABLED:
+    logger_provider.add_log_record_processor(BatchLogRecordProcessor(OTLPLogExporter(endpoint=OTLP_ENDPOINT)))
 set_logger_provider(logger_provider)
 
 request_counter = meter.create_counter(
@@ -58,7 +65,8 @@ latency_histogram = meter.create_histogram(
 
 LoggingInstrumentor().instrument(set_logging_format=True)
 logging.basicConfig(level=logging.INFO)
-logging.getLogger().addHandler(LoggingHandler(level=logging.INFO, logger_provider=logger_provider))
+if not OTEL_SDK_DISABLED:
+    logging.getLogger().addHandler(LoggingHandler(level=logging.INFO, logger_provider=logger_provider))
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)

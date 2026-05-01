@@ -4,3 +4,4 @@ opentelemetry-sdk==1.25.0
 opentelemetry-exporter-otlp==1.25.0
 opentelemetry-instrumentation-flask==0.46b0
 opentelemetry-instrumentation-logging==0.46b0
+pytest==8.2.2
