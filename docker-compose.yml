@@ -154,6 +154,38 @@ services:
       - cadvisor
       - alertmanager
       - blackbox-exporter
+      - otel-collector
+    networks:
+      - monitoring
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.103.1
+    container_name: otel-collector
+    restart: unless-stopped
+    command:
+      - --config=/etc/otelcol-contrib/config.yml
+    volumes:
+      - ./otel-collector/config.yml:/etc/otelcol-contrib/config.yml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "9464:9464"
+    networks:
+      - monitoring
+
+  python-observability-demo:
+    build:
+      context: ./python-app
+    container_name: python-observability-demo
+    restart: unless-stopped
+    environment:
+      OTEL_SERVICE_NAME: python-observability-demo
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      DEPLOYMENT_ENVIRONMENT: local
+    ports:
+      - "8000:8000"
+    depends_on:
+      - otel-collector
     networks:
       - monitoring
 

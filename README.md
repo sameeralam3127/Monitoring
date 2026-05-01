@@ -12,6 +12,8 @@ This repository contains a Docker-based monitoring and observability stack for L
 - `Blackbox Exporter` for HTTP health checks
 - `Loki` for log storage
 - `Promtail` for collecting logs and sending them to Loki
+- `OpenTelemetry Collector` for application telemetry ingestion
+- `Python OpenTelemetry demo app` instrumented with the OpenTelemetry Python SDK
 
 ## Services and Ports
 
@@ -23,6 +25,10 @@ This repository contains a Docker-based monitoring and observability stack for L
 | cAdvisor            | `8080` | [http://localhost:8080](http://localhost:8080)             |
 | Blackbox Exporter   | `9115` | [http://localhost:9115](http://localhost:9115)             |
 | Loki Ready Endpoint | `3100` | [http://localhost:3100/ready](http://localhost:3100/ready) |
+| Python OTel Demo    | `8000` | [http://localhost:8000](http://localhost:8000)             |
+| OTel Collector OTLP | `4317` | gRPC OTLP endpoint                                         |
+| OTel Collector HTTP | `4318` | HTTP OTLP endpoint                                         |
+| OTel Metrics        | `9464` | [http://localhost:9464/metrics](http://localhost:9464/metrics) |
 
 Node Exporter containers are exposed on ports `9101` to `9110`.
 
@@ -61,6 +67,7 @@ This command will:
 - build the Linux container image from `Dockerfile`
 - start `10` Linux containers with Node Exporter
 - start Prometheus, Grafana, Alertmanager, cAdvisor, Blackbox Exporter, Loki, and Promtail
+- start the OpenTelemetry Collector and Python OpenTelemetry demo app
 - create persistent Docker volumes for Grafana, Prometheus, and Loki
 
 ### 3. Verify the containers are running
@@ -110,6 +117,37 @@ Configured scrape jobs:
 - `cadvisor`
 - `blackbox-exporter`
 - `blackbox-http`
+- `otel-collector`
+
+## OpenTelemetry Python SDK Demo
+
+The stack includes a small Flask service in `python-app/` that is instrumented with the OpenTelemetry Python SDK. It exports traces, metrics, and logs to the OpenTelemetry Collector over OTLP.
+
+Key files:
+
+- `python-app/app.py`
+- `python-app/requirements.txt`
+- `otel-collector/config.yml`
+
+Generate sample telemetry:
+
+```bash
+curl http://localhost:8000/
+curl http://localhost:8000/health
+```
+
+Prometheus scrapes application metrics from the collector on `otel-collector:9464`. To verify the flow, open Prometheus and query:
+
+```promql
+demo_requests_total
+demo_request_latency_seconds_bucket
+```
+
+The collector currently exports traces and logs to its debug exporter, so they appear in the collector logs:
+
+```bash
+docker compose logs -f otel-collector
+```
 
 Included alerts:
 
@@ -206,7 +244,7 @@ The repository also includes:
 ## Next Improvements
 
 - Add Slack, email, or PagerDuty integrations to Alertmanager
-- Add OpenTelemetry and Tempo for traces
+- Add Tempo for persisted trace storage and Grafana trace exploration
 - Add exporters for Postgres, Redis, Nginx, MySQL, and application services
 - Add TLS, secrets, and stronger credentials for non-local use
 - Add long-term metric storage with Thanos, Mimir, or VictoriaMetrics
