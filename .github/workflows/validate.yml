@@ -1,0 +1,28 @@
+name: Validate monitoring stack
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose
+        run: docker compose config
+
+      - name: Validate Prometheus configuration
+        run: |
+          docker run --rm \
+            -v "$PWD/prometheus:/etc/prometheus:ro" \
+            prom/prometheus:v2.53.0 \
+            promtool check config /etc/prometheus/prometheus.yml
+
+      - name: Validate Python syntax
+        run: python -m py_compile python-app/app.py

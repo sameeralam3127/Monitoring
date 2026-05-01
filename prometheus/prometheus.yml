@@ -63,6 +63,7 @@ scrape_configs:
           - http://cadvisor:8080/healthz
           - http://alertmanager:9093/-/healthy
           - http://loki:3100/ready
+          - http://python-observability-demo:8000/health
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

@@ -54,3 +54,21 @@ groups:
         annotations:
           summary: "Synthetic check failed for {{ $labels.instance }}"
           description: "The blackbox probe failed for 2 minutes."
+
+      - alert: PythonDemoAppDown
+        expr: probe_success{job="blackbox-http", instance="http://python-observability-demo:8000/health"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Python OpenTelemetry demo app is down"
+          description: "The Python demo app health endpoint has failed for 2 minutes."
+
+      - alert: PythonDemoAppHighLatency
+        expr: histogram_quantile(0.95, sum by (le) (rate(demo_request_latency_seconds_bucket[5m]))) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Python OpenTelemetry demo app latency is high"
+          description: "The 95th percentile request latency has been above 500 ms for 5 minutes."

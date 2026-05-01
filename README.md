@@ -11,6 +11,7 @@ This repository contains a Docker-based monitoring and observability stack for L
 - `cAdvisor` for container-level metrics
 - `Blackbox Exporter` for HTTP health checks
 - `Loki` for log storage
+- `Tempo` for trace storage
 - `Promtail` for collecting logs and sending them to Loki
 - `OpenTelemetry Collector` for application telemetry ingestion
 - `Python OpenTelemetry demo app` instrumented with the OpenTelemetry Python SDK
@@ -25,6 +26,7 @@ This repository contains a Docker-based monitoring and observability stack for L
 | cAdvisor            | `8080` | [http://localhost:8080](http://localhost:8080)             |
 | Blackbox Exporter   | `9115` | [http://localhost:9115](http://localhost:9115)             |
 | Loki Ready Endpoint | `3100` | [http://localhost:3100/ready](http://localhost:3100/ready) |
+| Tempo               | `3200` | [http://localhost:3200/ready](http://localhost:3200/ready) |
 | Python OTel Demo    | `8000` | [http://localhost:8000](http://localhost:8000)             |
 | OTel Collector OTLP | `4317` | gRPC OTLP endpoint                                         |
 | OTel Collector HTTP | `4318` | HTTP OTLP endpoint                                         |
@@ -66,7 +68,7 @@ This command will:
 
 - build the Linux container image from `Dockerfile`
 - start `10` Linux containers with Node Exporter
-- start Prometheus, Grafana, Alertmanager, cAdvisor, Blackbox Exporter, Loki, and Promtail
+- start Prometheus, Grafana, Alertmanager, cAdvisor, Blackbox Exporter, Loki, Tempo, and Promtail
 - start the OpenTelemetry Collector and Python OpenTelemetry demo app
 - create persistent Docker volumes for Grafana, Prometheus, and Loki
 
@@ -100,6 +102,7 @@ After login, you should already see:
 
 - `Prometheus` as the default data source
 - `Loki` as the log data source
+- `Tempo` as the trace data source
 - `Advanced Monitoring Stack` dashboard
 
 ## Prometheus Configuration
@@ -121,13 +124,14 @@ Configured scrape jobs:
 
 ## OpenTelemetry Python SDK Demo
 
-The stack includes a small Flask service in `python-app/` that is instrumented with the OpenTelemetry Python SDK. It exports traces, metrics, and logs to the OpenTelemetry Collector over OTLP.
+The stack includes a small Flask service in `python-app/` that is instrumented with the OpenTelemetry Python SDK. It exports traces, metrics, and logs to the OpenTelemetry Collector over OTLP. The collector sends traces to Tempo and exposes app metrics for Prometheus.
 
 Key files:
 
 - `python-app/app.py`
 - `python-app/requirements.txt`
 - `otel-collector/config.yml`
+- `tempo/tempo.yml`
 
 Generate sample telemetry:
 
@@ -143,7 +147,7 @@ demo_requests_total
 demo_request_latency_seconds_bucket
 ```
 
-The collector currently exports traces and logs to its debug exporter, so they appear in the collector logs:
+Traces are stored in Tempo and available through Grafana's `Tempo` data source. The collector also sends traces and logs to its debug exporter, so you can inspect raw telemetry in collector logs:
 
 ```bash
 docker compose logs -f otel-collector
@@ -157,6 +161,8 @@ Included alerts:
 - `ContainerHighCPU`
 - `ContainerHighMemory`
 - `SyntheticProbeFailed`
+- `PythonDemoAppDown`
+- `PythonDemoAppHighLatency`
 
 ## Logging Setup
 
@@ -183,6 +189,11 @@ It probes internal HTTP endpoints for:
 - cAdvisor
 - Alertmanager
 - Loki
+- Python OpenTelemetry demo app
+
+## Validation
+
+The repository includes a GitHub Actions workflow at `.github/workflows/validate.yml` that checks Docker Compose, Prometheus config/rules, and Python syntax on pushes to `main` and pull requests.
 
 ## Useful Commands
 
@@ -244,7 +255,7 @@ The repository also includes:
 ## Next Improvements
 
 - Add Slack, email, or PagerDuty integrations to Alertmanager
-- Add Tempo for persisted trace storage and Grafana trace exploration
+- Add Grafana dashboard panels for Python app RED metrics and Tempo trace drilldowns
 - Add exporters for Postgres, Redis, Nginx, MySQL, and application services
 - Add TLS, secrets, and stronger credentials for non-local use
 - Add long-term metric storage with Thanos, Mimir, or VictoriaMetrics
